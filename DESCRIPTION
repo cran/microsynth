@@ -1,6 +1,6 @@
 Package: microsynth
 Title: Synthetic Control Methods with Micro- And Meso-Level Data
-Version: 1.0.9
+Version: 2.0.13
 Description: A generalization of the 'Synth' package that is designed
  for data at a more granular level (e.g., micro-level). Provides
  functions to construct weights (including propensity score-type
@@ -12,9 +12,9 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports: boot, survey, MASS, stats, utils, kernlab, LowRankQP, nleqslv,
-        pracma
+        pracma, parallel
 Suggests: knitr, xlsx, rmarkdown
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 Authors@R: c(
   person("Michael", "Robbins", , "mrobbins@rand.org", c("aut", "cre")),
   person("Steven", "Davenport", , "sdavenpo@rand.org", "aut"))
@@ -24,6 +24,6 @@ Author: Michael Robbins [aut, cre],
   Steven Davenport [aut]
 Maintainer: Michael Robbins <mrobbins@rand.org>
 URL: https://github.com/ssdavenport/microsynth
-Packaged: 2018-05-15 19:12:47 UTC; sdavenpo
+Packaged: 2019-04-10 20:36:09 UTC; sdavenpo
 Repository: CRAN
-Date/Publication: 2018-05-16 15:33:56 UTC
+Date/Publication: 2019-04-10 21:04:21 UTC
