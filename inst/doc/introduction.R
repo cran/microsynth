@@ -1,4 +1,4 @@
-## ----load, echo=F, warning=FALSE-----------------------------------------
+## ----load, echo=F, warning=FALSE----------------------------------------------
 library("microsynth")
 library("knitr")
 knitr::opts_chunk$set(message = FALSE, warning = FALSE, fig.height=3.1, fig.width=7.2, fig.show = "hold")
@@ -20,16 +20,16 @@ saveReducedMicrosynth <- function(msobject, filename) {
   }
 }
 
-## ----ex0_load------------------------------------------------------------
+## ----ex0_load-----------------------------------------------------------------
 colnames(seattledmi)
 set.seed(99199)
 
-## ----ex0_variables-------------------------------------------------------
+## ----ex0_variables------------------------------------------------------------
 cov.var <- c("TotalPop", "BLACK", "HISPANIC", "Males_1521", "HOUSEHOLDS", 
              "FAMILYHOUS", "FEMALE_HOU", "RENTER_HOU", "VACANT_HOU")
 match.out <- c("i_felony", "i_misdemea", "i_drugs", "any_crime")
 
-## ----ex1, eval = TRUE, echo=TRUE-----------------------------------------
+## ----ex1, eval = TRUE, echo=TRUE----------------------------------------------
 sea1 <- microsynth(seattledmi, 
                    idvar="ID", timevar="time", intvar="Intervention", 
                    start.pre=1, end.pre=12, end.post=16, 
@@ -40,10 +40,10 @@ sea1 <- microsynth(seattledmi,
 sea1
 summary(sea1)
 
-## ----ex1b, eval = TRUE---------------------------------------------------
+## ----ex1b, eval = TRUE--------------------------------------------------------
 plot_microsynth(sea1)
 
-## ----ex2, eval = FALSE, echo=TRUE----------------------------------------
+## ----ex2, eval = FALSE, echo=TRUE---------------------------------------------
 #  sea2 <- microsynth(seattledmi,
 #                     idvar="ID", timevar="time", intvar="Intervention",
 #                     start.pre=1, end.pre=12, end.post=c(14, 16),
@@ -53,19 +53,19 @@ plot_microsynth(sea1)
 #                     perm=250, jack=TRUE,
 #                     n.cores = min(parallel::detectCores(), 2))
 
-## ---- eval = TRUE, echo = FALSE------------------------------------------
+## ---- eval = TRUE, echo = FALSE-----------------------------------------------
 saveReducedMicrosynth(sea2, "../inst/extdata/sea2.rds")
 sea2 <- readRDS("../inst/extdata/sea2.rds")
 sea2
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 plot_microsynth(sea2)
 
-## ----ex3_vars------------------------------------------------------------
+## ----ex3_vars-----------------------------------------------------------------
 match.out <- c("i_robbery", "i_aggassau", "i_burglary", "i_larceny", "i_felony", 
                "i_misdemea", "i_drugsale", "i_drugposs", "any_crime")
 
-## ----ex3, eval = FALSE, echo=TRUE----------------------------------------
+## ----ex3, eval = FALSE, echo=TRUE---------------------------------------------
 #  sea3 <- microsynth(seattledmi,
 #                     idvar="ID", timevar="time", intvar="Intervention",
 #                     end.pre=12,
@@ -74,15 +74,15 @@ match.out <- c("i_robbery", "i_aggassau", "i_burglary", "i_larceny", "i_felony",
 #                     test="lower", check.feas=TRUE, use.backup = TRUE,
 #                     n.cores = min(parallel::detectCores(), 2))
 
-## ---- eval = TRUE, echo = FALSE------------------------------------------
+## ---- eval = TRUE, echo = FALSE-----------------------------------------------
 saveReducedMicrosynth(sea3, "../inst/extdata/sea3.rds")
 sea3 <- readRDS("../inst/extdata/sea3.rds")
 summary(sea3)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 plot_microsynth(sea3)
 
-## ----ex4, eval = FALSE, echo=TRUE----------------------------------------
+## ----ex4, eval = FALSE, echo=TRUE---------------------------------------------
 #  match.out <- list( 'i_robbery'=rep(2, 6),
 #                     'i_aggassau'=rep(2, 6),
 #                     'i_burglary'=rep(1, 12),
@@ -103,15 +103,15 @@ plot_microsynth(sea3)
 #                     n.cores = min(parallel::detectCores(), 2))
 #  
 
-## ----ex4load, eval = TRUE, echo = FALSE----------------------------------
+## ----ex4load, eval = TRUE, echo = FALSE---------------------------------------
 saveReducedMicrosynth(sea4, "../inst/extdata/sea4.rds")
 sea4 <- readRDS("../inst/extdata/sea4.rds")
 summary(sea4)
 
-## ----ex4plot-------------------------------------------------------------
+## ----ex4plot------------------------------------------------------------------
 plot_microsynth(sea4)
 
-## ----ex5, eval = TRUE, echo=TRUE, results='hide'-------------------------
+## ----ex5, eval = TRUE, echo=TRUE, results='hide'------------------------------
 match.out <- c("i_felony", "i_misdemea", "i_drugs", "any_crime")
 
 sea5 <- microsynth(seattledmi, 
@@ -123,7 +123,7 @@ sea5 <- microsynth(seattledmi,
 
 summary(sea5)
 
-## ----ex6, eval = FALSE, echo=TRUE----------------------------------------
+## ----ex6, eval = FALSE, echo=TRUE---------------------------------------------
 #  sea6 <- microsynth(seattledmi,
 #                     idvar="ID", timevar="time", intvar="Intervention",
 #                     end.pre=12, end.post=c(14, 16),
@@ -134,22 +134,22 @@ summary(sea5)
 #  
 #  sea6
 
-## ---- eval = TRUE, echo = FALSE------------------------------------------
+## ---- eval = TRUE, echo = FALSE-----------------------------------------------
 saveReducedMicrosynth(sea6, "../inst/extdata/sea6.rds")
 sea6 <- readRDS("../inst/extdata/sea6.rds")
 sea6
 
-## ----ex7, eval = TRUE, echo=TRUE-----------------------------------------
+## ----ex7, eval = TRUE, echo=TRUE----------------------------------------------
 plot_microsynth(sea6, plot.var=match.out[1:2])
 
-## ----ex8prep, eval = TRUE, echo=TRUE-------------------------------------
+## ----ex8prep, eval = TRUE, echo=TRUE------------------------------------------
 set.seed(86872)
 ids.t <- names(table(seattledmi$ID[seattledmi$Intervention==1]))
 ids.c <- names(table(seattledmi$ID[seattledmi$Intervention==0]))
 ids.synth <- c(sample(ids.t, 1), sample(ids.c, 100))
 seattledmi.one <- seattledmi[is.element(seattledmi$ID, as.numeric(ids.synth)), ]
 
-## ----ex8, eval = FALSE, echo=TRUE----------------------------------------
+## ----ex8, eval = FALSE, echo=TRUE---------------------------------------------
 #  sea8 <- microsynth(seattledmi.one,
 #                     idvar="ID", timevar="time", intvar="Intervention",
 #                     match.out=match.out[4], match.covar=cov.var,
@@ -158,16 +158,16 @@ seattledmi.one <- seattledmi[is.element(seattledmi$ID, as.numeric(ids.synth)), ]
 #                     check.feas=TRUE, use.backup=TRUE,
 #                     n.cores = min(parallel::detectCores(), 2))
 
-## ---- eval = TRUE, echo = FALSE------------------------------------------
+## ---- eval = TRUE, echo = FALSE-----------------------------------------------
 saveReducedMicrosynth(sea8, "../inst/extdata/sea8.rds")
 sea8 <- readRDS("../inst/extdata/sea8.rds")
 plot_microsynth(sea8)
 summary(sea8)
 
-## ----ex9, eval = TRUE, echo=TRUE-----------------------------------------
+## ----ex9, eval = TRUE, echo=TRUE----------------------------------------------
 seattledmi.cross <- seattledmi[seattledmi$time==16, colnames(seattledmi)!="time"]
 
-## ----ex9results, eval = FALSE, echo=TRUE---------------------------------
+## ----ex9results, eval = FALSE, echo=TRUE--------------------------------------
 #  sea9 <- microsynth(seattledmi.cross,
 #                     idvar="ID", intvar="Intervention",
 #                     match.out=FALSE, match.covar=cov.var,
@@ -176,7 +176,7 @@ seattledmi.cross <- seattledmi[seattledmi$time==16, colnames(seattledmi)!="time"
 #                     perm=250, jack=TRUE,
 #                     n.cores = min(parallel::detectCores(), 2))
 
-## ---- eval = TRUE, echo = FALSE------------------------------------------
+## ---- eval = TRUE, echo = FALSE-----------------------------------------------
 saveReducedMicrosynth(sea9, "../inst/extdata/sea9.rds")
 sea9 <- readRDS("../inst/extdata/sea9.rds")
 sea9
