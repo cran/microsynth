@@ -12,7 +12,7 @@
 
 <meta name="author" content="Michael Robbins and Steven Davenport" />
 
-<meta name="date" content="2021-01-11" />
+<meta name="date" content="2021-02-26" />
 
 <title>Ensuring Model Feasibility</title>
 
@@ -217,7 +217,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">Ensuring Model Feasibility</h1>
 <h4 class="author">Michael Robbins and Steven Davenport</h4>
-<h4 class="date">2021-01-11</h4>
+<h4 class="date">2021-02-26</h4>
 
 
 
@@ -245,7 +245,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li>Compare the distribution of variable values in treatment units to the un-treated units.</li>
 <li>Attempt to reduce the number of matching variables, move variables from exact matches (<code>match.out</code>/<code>match.covar</code>) to best-possible matches (<code>match.out.min</code>/<code>match.covar.min</code>), or aggregate time-variant variables before matching.</li>
 </ul>
-<p>When attempts to match on a sparse variable cause model infeasiblity, there are several solutions:</p>
+<p>When attempts to match on a sparse variable cause model infeasibility, there are several solutions:</p>
 <ul>
 <li>Do not attempt an exact match. If the variable is time-invariant, move it from <code>match.covar</code> to <code>match.covar.min</code>; if the variable is time-variant, move it from <code>match.out</code> to <code>match.out.min</code>.</li>
 <li>If the variable is time-variant, aggregate the variable over multiple time periods before matching. If just one or several variables that appear to be sparse or for which the treatment contains values that are rare in the un-treated units, then the user can issue instructions for each of those variables to be aggregated over different time periods. (Those time periods do not have to be at regular intervals, for instance if the sparseness only occurs at certain points in the pre-intervention data.) Exercise 4 from the  provides an example of this. If the user would like to aggregate all time-variant variables over the same regular time periods, then it is somewhat simple to pass <code>match.out</code> or <code>match.out.min</code> a vector of variable names, and specify the aggregation periods using <code>period</code>.</li>

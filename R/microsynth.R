@@ -182,7 +182,7 @@
 #'
 #' @param match.covar Either a logical or a vector of variable names that
 #'   indicates which time invariant covariates
-#'   are to be used for weighting.  Covariates must be numeric variables. Weights are
+#'   are to be used for weighting.  Weights are
 #'   calculated so that treatment and synthetic control exactly match across
 #'   these variables.  If \code{match.covar = TRUE}, it is set equal to a vector
 #'   of variable names corresponding to the time invariant variables that
@@ -242,7 +242,8 @@
 #'   statistic.  Can also be a logical indicator.  When \code{omnibus.var =
 #'   TRUE}, it is reset as being equal to \code{result.var}.  When
 #'   \code{omnibus.var = NULL} or \code{omnibus = FALSE}, no omnibus statistic
-#'   is calculated.
+#'   is calculated.  \code{omnibus.var} should not contain elements not in
+#'   \code{result.var}.
 #'
 #' @param period An integer that gives the granularity of the data that will be
 #'   used for plotting and compiling results.  If \code{match.out} and
@@ -354,7 +355,8 @@
 #'   replication group (\code{NA}s only appear in jackknife weights).
 #'   \code{w$MSE} is a 6 x C matrix that give the MSEs for each set of weights.
 #'   MSEs are listed for the primary and secondary constraints for the first,
-#'   second, and third models.  \code{w$Model} is a length-C vector that
+#'   second, and third models.  Note that the primary constraints differ for each
+#'   model (see Robbins and Davenport, 2021). \code{w$Model} is a length-C vector that
 #'   indicates whether backup models were used in the calculation of each set of
 #'   weights.  \code{w$keep.groups} is a logical vector indicating which groups
 #'   are to be used in analysis (groups that are not used have pre-intervention
@@ -541,9 +543,9 @@
 #'
 #' # Apply microsynth in the traditional setting of Synth
 #' # Create macro-level (small n) data, with 1 treatment unit
-#' set.seed(86872)
+#' set.seed(86879)
 #' ids.t <- names(table(seattledmi$ID[seattledmi$Intervention==1]))
-#' ids.c <- names(table(seattledmi$ID[seattledmi$Intervention==0]))
+#' ids.c <- setdiff(names(table(seattledmi$ID)), ids.t)
 #' ids.synth <- c(base::sample(ids.t, 1), base::sample(ids.c, 100))
 #' seattledmi.one <- seattledmi[is.element(seattledmi$ID,
 #'            as.numeric(ids.synth)), ]
@@ -565,7 +567,7 @@
 #'
 #' # Use microsynth to calculate propensity score-type weights
 #' # Prepare cross-sectional data at time of intervention
-#' seattledmi.cross <- seattledmi[seattledmi$time==16, colnames(seattledmi)!='time']#'
+#' seattledmi.cross <- seattledmi[seattledmi$time==16, colnames(seattledmi)!='time']
 #'
 #' # Apply microsynth to find propensity score-type weights
 #' # runtime: ~5 minutes
@@ -586,6 +588,9 @@ microsynth <- function(data, idvar, intvar, timevar = NULL, start.pre = NULL, en
     test = "twosided", perm = 0, jack = 0, use.survey = TRUE, cut.mse = Inf, check.feas = FALSE, 
     use.backup = FALSE, w = NULL, max.mse = 0.01, maxit = 250, cal.epsilon = 1e-04, calfun = "linear", 
     bounds = c(0, Inf), result.file = NULL, printFlag = TRUE, n.cores = TRUE) {
+    
+    # Force to dataframe (e.g., not 'tibble')
+    data <- as.data.frame(data)
     
     # Determine the number of cores to be used. CRAN tops at 2.
     n.cores <- msCluster(n.cores)
@@ -681,7 +686,12 @@ microsynth <- function(data, idvar, intvar, timevar = NULL, start.pre = NULL, en
     nv.names <- union(match.covar, match.covar.min)
     v.names <- result.var
     if (length(match.out) > 0) {
-        v.names <- union(v.names, names(match.out))
+        # v.names <- union(v.names, names(match.out))
+        if (is.list(match.out)) {
+            v.names <- union(v.names, names(match.out))
+        } else {
+            v.names <- union(v.names, match.out)
+        }
     }
     if (length(match.out.min) > 0) {
         if (is.list(match.out.min)) {
@@ -703,8 +713,8 @@ microsynth <- function(data, idvar, intvar, timevar = NULL, start.pre = NULL, en
     nv.names <- setdiff(nv.names, rm.col)
     
     # Shape panel data into 3D array, generate intervention matrix, etc.
-    data <- newreshape(data, nv.names = nv.names, v.names = v.names, timevar = timevar, idvar = idvar, 
-        intvar = intvar)
+    data <- newreshape(data, nv.names = nv.names, v.names = v.names, timevar = timevar, 
+        idvar = idvar, intvar = intvar)
     if (length(result.var) == 0) {
         result.var <- data[[4]]
         if (!reset.result.var) {
@@ -823,6 +833,13 @@ microsynth <- function(data, idvar, intvar, timevar = NULL, start.pre = NULL, en
             omnibus.var <- NULL
         }
     }
+    if (length(omnibus.var) == 1) {
+        warning("If non-NULL, omnibus.var should have length of at least 2. It is being reset to NULL.")
+        omnibus.var <- NULL
+    }
+    if (length(setdiff(omnibus.var, result.var)) > 0) {
+        stop("omnibus.var contains elments not in results.var.")
+    }
     int.num <- 1
     dum <- max(colSums(Intervention == 1))
     dum <- min(NROW(Intervention) - dum, dum)
@@ -911,14 +928,14 @@ microsynth <- function(data, idvar, intvar, timevar = NULL, start.pre = NULL, en
             message("Calculating weights...", "\n", appendLF = FALSE)
         }
         w <- get.w(data, match.covar, match.covar.min, match.out, match.out.min, boot = perm, 
-            jack = jack, Int = Intervention[, as.character(end.pre)], int.val = int.num, trim = NULL, 
-            end.pre = end.pre, cal.epsilon = cal.epsilon, maxit = maxit, bounds = bounds, 
+            jack = jack, Int = Intervention[, as.character(end.pre)], int.val = int.num, 
+            trim = NULL, end.pre = end.pre, cal.epsilon = cal.epsilon, maxit = maxit, bounds = bounds, 
             calfun = calfun, check.feas = check.feas, scale.var = scale.var, cut.mse = max.mse, 
             use.backup = use.backup, time.names = time.names, printFlag = printFlag, n.cores = n.cores)
         tmp <- proc.time() - tmp
         if (printFlag) {
-            message("Calculation of weights complete: Total time = ", round(tmp[3], 2), "\n\n", 
-                sep = "", appendLF = FALSE)
+            message("Calculation of weights complete: Total time = ", round(tmp[3], 2), 
+                "\n\n", sep = "", appendLF = FALSE)
         }
     } else {
         if (printFlag) {
@@ -929,8 +946,8 @@ microsynth <- function(data, idvar, intvar, timevar = NULL, start.pre = NULL, en
         }
         is.correct.w <- is.list(w)
         if (is.correct.w) {
-            is.correct.w <- is.correct.w & sum(names(w) != c("Weights", "Intervention", "MSE", 
-                "Model", "Summary", "keep.groups")) == 0
+            is.correct.w <- is.correct.w & sum(names(w) != c("Weights", "Intervention", 
+                "MSE", "Model", "Summary", "keep.groups")) == 0
         }
         if (is.correct.w) {
             is.correct.w <- is.correct.w & dim(w$Weights)[1] == dim(data)[1]
@@ -1009,8 +1026,9 @@ microsynth <- function(data, idvar, intvar, timevar = NULL, start.pre = NULL, en
                 out.coefs[[i]] <- stats.tmp[[5]]
                 tmp <- proc.time() - tmp
                 if (printFlag) {
-                  message("Completed calculation of survey statistics for end.post = ", time.names[end.post[i]], 
-                    ".  Time = ", round(tmp[3], 2), "\n\n", sep = "", appendLF = FALSE)
+                  message("Completed calculation of survey statistics for end.post = ", 
+                    time.names[end.post[i]], ".  Time = ", round(tmp[3], 2), "\n\n", sep = "", 
+                    appendLF = FALSE)
                 }
                 Pct.Chng <- cbind(Pct.Chng = stats[[i]][[2]][1, ])
                 if (is.element("Omnibus", rownames(Pct.Chng))) {
@@ -1052,8 +1070,8 @@ microsynth <- function(data, idvar, intvar, timevar = NULL, start.pre = NULL, en
                   } else {
                     Jack.pVal <- cbind(Jack.pVal = 2 * stats::pnorm(abs(jack.stats1), lower.tail = FALSE))
                     if (is.element("Omnibus", rownames(Jack.pVal))) {
-                      Jack.pVal["Omnibus", ] <- stats::pchisq(c(jack.stats1)["Omnibus"], df = synth.dof, 
-                        lower.tail = FALSE)
+                      Jack.pVal["Omnibus", ] <- stats::pchisq(c(jack.stats1)["Omnibus"], 
+                        df = synth.dof, lower.tail = FALSE)
                     }
                   }
                   Jack.CI <- make.ci(jack.stats2, sqrt(jack.delta.out), alpha = 1 - confidence)
@@ -1166,7 +1184,6 @@ microsynth <- function(data, idvar, intvar, timevar = NULL, start.pre = NULL, en
 
 
 
-
 # Sub-function of microsynth(); calculate p-values when permutation is used
 get.pval <- function(stats, p = NCOL(stats[[1]]), k = length(stats), ret.na = FALSE) {
     nams <- colnames(stats[[1]])
@@ -1193,7 +1210,8 @@ get.pval <- function(stats, p = NCOL(stats[[1]]), k = length(stats), ret.na = FA
 
 
 
-# Sub-function of microsynth(); reshape data to make 3D array with other necessary outputs
+# Sub-function of microsynth(); reshape data to make 3D array with other necessary
+# outputs
 newreshape <- function(data, timevar, idvar, intvar, v.names = NULL, nv.names = NULL) {
     times = names(table(data[, timevar]))
     if (length(v.names) == 0) {
