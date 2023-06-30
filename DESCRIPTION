@@ -1,35 +1,30 @@
 Package: microsynth
 Title: Synthetic Control Methods with Micro- And Meso-Level Data
-Version: 2.0.31
-Authors@R: 
-    c(person(given = "Michael",
-             family = "Robbins",
-             role = c("aut", "cre"),
-             email = "mrobbins@rand.org"),
-      person(given = "Steven",
-             family = "Davenport",
-             role = "aut",
-             email = "ssdport@gmail.com"))
-Description: A generalization of the 'Synth' package that is
-    designed for data at a more granular level (e.g., micro-level).
-    Provides functions to construct weights (including propensity
-    score-type weights) and run analyses for synthetic control methods
-    with micro- and meso-level data; see Robbins, Saunders, and Kilmer
-    (2017) <doi:10.1080/01621459.2016.1213634> and Robbins and Davenport
-    (2021) <doi:10.18637/jss.v097.i02>.
+Version: 2.0.44
+Authors@R: c(
+    person("Michael", "Robbins", , "mrobbins@rand.org", role = c("aut", "cre")),
+    person("Steven", "Davenport", , "ssdport@gmail.com", role = "aut")
+  )
+Description: A generalization of the 'Synth' package that is designed for
+    data at a more granular level (e.g., micro-level). Provides functions
+    to construct weights (including propensity score-type weights) and run
+    analyses for synthetic control methods with micro- and meso-level
+    data; see Robbins, Saunders, and Kilmer (2017)
+    <doi:10.1080/01621459.2016.1213634> and Robbins and Davenport (2021)
+    <doi:10.18637/jss.v097.i02>.
 License: GPL-3
 VignetteBuilder: knitr
+Additional_repositories: https://ssdavenport.github.io/drat
 Encoding: UTF-8
-LazyData: true
-RoxygenNote: 7.1.1
-Imports: boot, survey, kernlab, LowRankQP, nleqslv, stats, parallel,
-        utils, pracma
-Suggests: MASS, xlsx, knitr, rmarkdown
+RoxygenNote: 7.2.3
+Suggests: knitr, LowRankQP, MASS, rmarkdown, xlsx
+Imports: kernlab, methods, parallel, pracma, stats, survey, utils
 Depends: R (>= 2.10)
+LazyData: true
 NeedsCompilation: no
-Packaged: 2021-02-26 19:04:39 UTC; macbookpro
+Packaged: 2023-06-29 19:39:38 UTC; macbookpro
 Author: Michael Robbins [aut, cre],
   Steven Davenport [aut]
 Maintainer: Michael Robbins <mrobbins@rand.org>
 Repository: CRAN
-Date/Publication: 2021-02-26 22:00:05 UTC
+Date/Publication: 2023-06-30 08:30:06 UTC

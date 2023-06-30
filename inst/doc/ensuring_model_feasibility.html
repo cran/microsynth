@@ -1,20 +1,44 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Michael Robbins and Steven Davenport" />
 
-<meta name="date" content="2021-02-26" />
+<meta name="date" content="2023-06-29" />
 
 <title>Ensuring Model Feasibility</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
 
 
 
@@ -31,9 +55,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -202,7 +223,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -217,11 +239,15 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">Ensuring Model Feasibility</h1>
 <h4 class="author">Michael Robbins and Steven Davenport</h4>
-<h4 class="date">2021-02-26</h4>
+<h4 class="date">2023-06-29</h4>
 
 
 
-<p>Using microSynth is easy when the models used to calculate weights are feasible. But as more variables are used for matching, especially when data is scarce or variables are sparse, the risk of an infeasible model increases. Below is a quick guide to how to troubleshoot model feasiblity issues.</p>
+<p>Using microSynth is easy when the models used to calculate weights
+are feasible. But as more variables are used for matching, especially
+when data is scarce or variables are sparse, the risk of an infeasible
+model increases. Below is a quick guide to how to troubleshoot model
+feasiblity issues.</p>
 <div id="causes-of-model-infeasibility" class="section level2">
 <h2>Causes of model infeasibility</h2>
 <p>Model infeasibility becomes increasingly likely when:</p>
@@ -236,37 +262,87 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </div>
 <div id="responses-to-an-infeasible-model" class="section level2">
 <h2>Responses to an infeasible model</h2>
-<p>As there are multiple causes of model infeasibility, there is an equally broad range of responses.</p>
+<p>As there are multiple causes of model infeasibility, there is an
+equally broad range of responses.</p>
 <div id="specification-of-matching-variables" class="section level3">
 <h3>Specification of matching variables</h3>
-<p>If a model is found to be infeasible, the problem may trace back to matching variable specification. We recommend the following diagnostic steps:</p>
+<p>If a model is found to be infeasible, the problem may trace back to
+matching variable specification. We recommend the following diagnostic
+steps:</p>
 <ul>
-<li>Review the frequency of matching variables (e.g., with <code>hist()</code> or <code>table()</code>) to check for sparseness. Sparse variables are difficult to match on without large sample sizes.</li>
-<li>Compare the distribution of variable values in treatment units to the un-treated units.</li>
-<li>Attempt to reduce the number of matching variables, move variables from exact matches (<code>match.out</code>/<code>match.covar</code>) to best-possible matches (<code>match.out.min</code>/<code>match.covar.min</code>), or aggregate time-variant variables before matching.</li>
+<li>Review the frequency of matching variables (e.g., with
+<code>hist()</code> or <code>table()</code>) to check for sparseness.
+Sparse variables are difficult to match on without large sample
+sizes.</li>
+<li>Compare the distribution of variable values in treatment units to
+the un-treated units.</li>
+<li>Attempt to reduce the number of matching variables, move variables
+from exact matches (<code>match.out</code>/<code>match.covar</code>) to
+best-possible matches
+(<code>match.out.min</code>/<code>match.covar.min</code>), or aggregate
+time-variant variables before matching.</li>
 </ul>
-<p>When attempts to match on a sparse variable cause model infeasibility, there are several solutions:</p>
+<p>When attempts to match on a sparse variable cause model
+infeasibility, there are several solutions:</p>
 <ul>
-<li>Do not attempt an exact match. If the variable is time-invariant, move it from <code>match.covar</code> to <code>match.covar.min</code>; if the variable is time-variant, move it from <code>match.out</code> to <code>match.out.min</code>.</li>
-<li>If the variable is time-variant, aggregate the variable over multiple time periods before matching. If just one or several variables that appear to be sparse or for which the treatment contains values that are rare in the un-treated units, then the user can issue instructions for each of those variables to be aggregated over different time periods. (Those time periods do not have to be at regular intervals, for instance if the sparseness only occurs at certain points in the pre-intervention data.) Exercise 4 from the  provides an example of this. If the user would like to aggregate all time-variant variables over the same regular time periods, then it is somewhat simple to pass <code>match.out</code> or <code>match.out.min</code> a vector of variable names, and specify the aggregation periods using <code>period</code>.</li>
+<li>Do not attempt an exact match. If the variable is time-invariant,
+move it from <code>match.covar</code> to <code>match.covar.min</code>;
+if the variable is time-variant, move it from <code>match.out</code> to
+<code>match.out.min</code>.</li>
+<li>If the variable is time-variant, aggregate the variable over
+multiple time periods before matching. If just one or several variables
+that appear to be sparse or for which the treatment contains values that
+are rare in the un-treated units, then the user can issue instructions
+for each of those variables to be aggregated over different time
+periods. (Those time periods do not have to be at regular intervals, for
+instance if the sparseness only occurs at certain points in the
+pre-intervention data.) Exercise 4 from the provides an example of this.
+If the user would like to aggregate all time-variant variables over the
+same regular time periods, then it is somewhat simple to pass
+<code>match.out</code> or <code>match.out.min</code> a vector of
+variable names, and specify the aggregation periods using
+<code>period</code>.</li>
 </ul>
 </div>
 <div id="parameters-for-calculating-weights" class="section level3">
 <h3>Parameters for calculating weights</h3>
-<p>If varying the specification of matching variables is not satisfactory, the user can set the parameters microSynth() uses for the calculation of weights.</p>
+<p>If varying the specification of matching variables is not
+satisfactory, the user can set the parameters microSynth() uses for the
+calculation of weights.</p>
 <ul>
-<li><code>max.mse</code> may be raised. This relaxes the constraint governing matches for variables passed to <code>match.out</code> and <code>match.covar</code>.</li>
-<li>Advanced users may wish to alter <code>maxit</code>, <code>cal.epsilon</code>, <code>calfun</code>, and <code>bounds</code>, which correspond to parameters from the <code>survey::calibrate()</code> and govern the calculation of weights.</li>
+<li><code>max.mse</code> may be raised. This relaxes the constraint
+governing matches for variables passed to <code>match.out</code> and
+<code>match.covar</code>.</li>
+<li>Advanced users may wish to alter <code>maxit</code>,
+<code>cal.epsilon</code>, <code>calfun</code>, and <code>bounds</code>,
+which correspond to parameters from the <code>survey::calibrate()</code>
+and govern the calculation of weights.</li>
 </ul>
 </div>
 <div id="calling-on-computationally-intensive-back-up-models" class="section level3">
 <h3>Calling on (computationally-intensive) back-up models</h3>
-<p>By default microSynth() attempts to calculate weights using simple methods. But because these are not always sufficient to produce a feasible model, two arguments, <code>check.feas</code> and <code>use.backup</code>, specify how microsynth should find and use less restrictive backup models. The two arguments do not interact and can be set independently.</p>
-<p><code>check.feas = TRUE</code> will search for a single model that yields satisfactory constraints for all purposes: estimating main weights, permutation weights, and jackknife residuals. The same model will be used for all purposes.</p>
-<p><code>use.backup = TRUE</code> will calculate the main weights without checking for feasibility, but if weights appear to be poor (i.e., they do not satisfy the max.mse condition), then weights will be re-calculated using another model. This way, different backup models may be used for different purposes (i.e., for estimating main weights, permutation weights, and jackknife residuals).</p>
+<p>By default microSynth() attempts to calculate weights using simple
+methods. But because these are not always sufficient to produce a
+feasible model, two arguments, <code>check.feas</code> and
+<code>use.backup</code>, specify how microsynth should find and use less
+restrictive backup models. The two arguments do not interact and can be
+set independently.</p>
+<p><code>check.feas = TRUE</code> will search for a single model that
+yields satisfactory constraints for all purposes: estimating main
+weights, permutation weights, and jackknife residuals. The same model
+will be used for all purposes.</p>
+<p><code>use.backup = TRUE</code> will calculate the main weights
+without checking for feasibility, but if weights appear to be poor
+(i.e., they do not satisfy the max.mse condition), then weights will be
+re-calculated using another model. This way, different backup models may
+be used for different purposes (i.e., for estimating main weights,
+permutation weights, and jackknife residuals).</p>
 </div>
 </div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
