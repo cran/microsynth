@@ -18,6 +18,8 @@ microsynth(
   match.covar.min = NULL,
   result.var = TRUE,
   omnibus.var = result.var,
+  R = NULL,
+  r = NULL,
   period = 1,
   scale.var = "Intercept",
   confidence = 0.9,
@@ -173,6 +175,24 @@ statistic.  Can also be a logical indicator.  When \code{omnibus.var =
 is calculated.  \code{omnibus.var} should not contain elements not in
 \code{result.var}.}
 
+\item{R, r}{Applicable only if \code{omnibus.var} is non-\code{NULL},
+in which case the omnibus test is framed as a Wald test of
+\eqn{H_0}: \eqn{Rd = r}, where \eqn{d} is a vector of
+the length of \code{omnibus.var} indicating the treatment effect (as a
+percent change) on the respective outcomes. \code{R} should be a matrix with
+the columns corresponding to the elements of \code{omnibus.var} and the
+number of rows less than or equal to the length of \code{omnibus.var}.
+\code{r} is a vector with length equal to the number of rows of \code{R}.
+If \code{test = 'twosided'}, \code{test = 'lower'}, or \code{test = 'upper'},
+the procedure evaulates \eqn{H_0} against \eqn{H_1}: \eqn{Rd \neq r},
+\eqn{Rd < r}, or \eqn{Rd > r}, respectively.  \code{R} defaults
+to an identity matrix, and \code{r} defaults to a vector of zeros. If
+\code{length(r) = 1}, a confidence interval on \eqn{Rd} is provided in the
+results. As an example, if \code{omnibus.var} has two elements, to test to
+see if the treatment effects (as a percent change) for those outcomes
+differ from one another, set \code{R = matrix(c(1, -1), 1, 2)} and
+\code{r = 0}.}
+
 \item{period}{An integer that gives the granularity of the data that will be
 used for plotting and compiling results.  If \code{match.out} and
 \code{match.out.min} are provided a vector of variable names, it will also
@@ -289,8 +309,9 @@ parallelization is not invoked.  Note that the
 documentation for \code{detectCores} makes clear that it is not failsafe and
 could return a spurious number of available cores.}
 
-\item{ret.stats}{if set to \code{TRUE}, returns four additional elements:
-\code{stats}, \code{stats1}, \code{stats2} and \code{delta.out}.}
+\item{ret.stats}{If \code{TRUE}, four additional elements are returned:
+\code{stats}, \code{stats1}, \code{stats2} and \code{delta.out}. See the output
+descriptions for details.}
 }
 \value{
 \code{microsynth} returns a list with up to five elements: a)
@@ -400,10 +421,7 @@ treatment is to be matched to synthetic control as closely as possible.  If
 there are no variables specified in \code{match.covar.min} and
 \code{match.out.min}, the function \code{calibrate()} from the \code{survey}
 package is used to calculate weights.  Otherwise, the function
-\code{LowRankQP()} from the package of the same name is used, if it is
-available on the user's machine (it is now in the CRAN archive, so would need
-to be installed by other means). If the \code{LowRankQP} package is unavailable,
-it will use \code{ipop()} from the \code{kernlab} package.  In the event
+\code{LowRankQP()} from the package of the same name is used.  In the event
 that the model specified by \code{match.covar} and \code{match.out} is not
 feasible (i.e., weights do not exist that exactly match treatment and
 synthetic control subject to the given constraints), a less restrictive
@@ -469,7 +487,7 @@ set.seed(99199) # for reproducibility
 # Perform matching and estimation, without permutations or jackknife
 # runtime: < 1 min
 
-\donttest{
+\dontrun{
 sea1 <- microsynth(seattledmi,
                   idvar='ID', timevar='time', intvar='Intervention',
                   start.pre=1, end.pre=12, end.post=16,
@@ -481,9 +499,8 @@ sea1 <- microsynth(seattledmi,
 # View results
 summary(sea1)
 plot_microsynth(sea1)
-}
 
-\dontrun{
+
 # Repeat matching and estimation, with permutations and jackknife
 # Set permutations and jack-knife to very few groups (2) for
 # quick demonstration only.
